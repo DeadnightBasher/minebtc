@@ -1,0 +1,38 @@
+body {
+    background-color: orange;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Ensure banner image is responsive */
+.banner {
+    width: 80%;         /* Takes up 80% of the screen width */
+    max-width: 600px;   /* Ensures it never exceeds 600px width */
+    height: auto;       /* Keeps the aspect ratio */
+    display: block;     
+    margin: 0 auto;     /* Centers the image */
+}
+
+/* Ensure bottom image (Bjorn) is responsive */
+.bottom-image {
+    width: 60%;         /* Takes up 50% of the screen width */
+    max-width: 500px;   /* Ensures it never exceeds 300px width */
+    height: auto;       /* Keeps the aspect ratio */
+    display: block;
+    margin: 20px auto;  /* Adds space and centers the image */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: blue;
+    color: red;
+    border: none;
+    border-radius: 5px;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.1);
+}

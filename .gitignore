@@ -1,0 +1,42 @@
+# Various IDEs and Editors
+.vscode/
+.idea/
+**/*~
+
+# Mac OSX temporary files
+.DS_Store
+**/.DS_Store
+
+# dfx temporary files
+.dfx/
+dfx.json.lock
+
+# generated files
+**/declarations/
+
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Frontend dependencies and build outputs
+node_modules/
+dist/
+.svelte-kit/
+
+# WebAssembly build artifacts
+*.wasm
+
+# Environment variables
+.env
+
+# Logs and debugging files
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Temporary files
+*.swp
+*.swo
+
+# Ignore specific editor configurations
+*.code-workspace
