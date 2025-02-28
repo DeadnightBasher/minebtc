@@ -7,14 +7,46 @@
     <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
 </head>
 <body>
+
     <img src="banner.png" alt="Banner" class="banner"> <!-- Banner Image -->
-    
-    <h1>Welcome to MineBTC</h1>
-    <button onclick="fetchBackendData()">Fetch Data</button>
-    <p id="result">Click the button to get a response from the backend.</p>
-    
-    <script src="script.js"></script> <!-- Link to external JavaScript -->
-    
-    <img src="bjorn.jpg" alt="Bjorn" class="bottom-image"> <!-- Bjorn Image at Bottom -->
+
+    <div class="container"> 
+        <!-- Left Side (Main Content) -->
+        <div class="left-section">
+            <h1>Welcome to MineBTC</h1>
+
+            <div class="button-container">
+                <button id="fetchDataBtn" onclick="fetchBackendData()">Fetch Data</button>
+                <button id="loadVideoBtn" onclick="loadCatVideo()">Load Space Enemy</button>
+            </div>
+
+            <p id="result">Click a button to perform an action.</p>
+
+            <div id="media-container">
+                <img id="bjornImage" src="bjorn.jpg" alt="Bjorn" class="bottom-image">
+            </div>
+        </div>
+
+        <!-- Right Side (Buttons and Inputs) -->
+        <div class="right-section">
+            <h2>Control Panel</h2>
+
+            <!-- Login Button -->
+            <button id="loginButton">Login with Internet Identity</button>
+            <p id="principal"></p>
+
+            <!-- Hidden Text Fields and Buttons (shown after login) -->
+            <div id="authFields" class="hidden">
+                <input type="text" id="inputField1" placeholder="Enter da name">
+                <button id="actionButton1">Submit</button>  
+                <input type="text" id="userIdField" readonly>
+                <input type="text" id="userNameField" readonly>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script> <!-- Regular script -->
+    <script type="module" src="login.js"></script> <!-- Module script -->
+
 </body>
 </html>
