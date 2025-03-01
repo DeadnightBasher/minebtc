@@ -1,3 +1,5 @@
 service : {
-    "greet": (text) -> (text) query;
+  "register_user": () -> (nat64, opt text);
+  "set_user_name": (text) -> (variant { Ok; Err: text });
+  "get_user_profile": () -> (opt record { nat64; text }) query;
 }
