@@ -1,7 +1,7 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::{query, update};
 use ic_stable_structures::{
-    memory_manager::{MemoryManager, VirtualMemory, MemoryId}, // Added MemoryId
+    memory_manager::{MemoryManager, VirtualMemory, MemoryId},
     DefaultMemoryImpl,
     StableBTreeMap,
     storable::{Storable, Bound}
@@ -43,11 +43,11 @@ thread_local! {
         RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
 
     static USERS: RefCell<StableBTreeMap<Vec<u8>, UserProfile, Memory>> = RefCell::new(
-        StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0)))) // Fixed
+        StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))))
     );
 
     static USER_COUNTER: RefCell<StableBTreeMap<u64, u64, Memory>> = RefCell::new(
-        StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1)))) // Fixed
+        StableBTreeMap::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))))
     );
 }
 
@@ -84,7 +84,7 @@ fn register_user() -> (u64, Option<String>) {
     })
 }
 
-// Sets the user's name if it hasn't been set before
+// Sets or updates the user's name (now mutable)
 #[update]
 fn set_user_name(name: String) -> Result<(), String> {
     let caller = ic_cdk::caller();
@@ -94,13 +94,9 @@ fn set_user_name(name: String) -> Result<(), String> {
         let mut users = users.borrow_mut();
 
         if let Some(mut profile) = users.get(&caller_bytes) {
-            if profile.name.is_empty() {
-                profile.name = name;
-                users.insert(caller_bytes, profile);
-                Ok(())
-            } else {
-                Err("Name already set and cannot be changed.".to_string())
-            }
+            profile.name = name; // Always update the name
+            users.insert(caller_bytes, profile);
+            Ok(())
         } else {
             Err("User not registered.".to_string())
         }
