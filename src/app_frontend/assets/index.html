@@ -1,52 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MineBTC</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MineBTC</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 </head>
 <body>
-
-    <img src="banner.png" alt="Banner" class="banner"> <!-- Banner Image -->
-
-    <div class="container"> 
-        <!-- Left Side (Main Content) -->
-        <div class="left-section">
-            <h1>Welcome to MineBTC</h1>
-
-            <div class="button-container">
-                <button id="fetchDataBtn" onclick="fetchBackendData()">Fetch Data</button>
-                <button id="loadVideoBtn" onclick="loadCatVideo()">Load Space Enemy</button>
-            </div>
-
-            <p id="result">Click a button to perform an action.</p>
-
-            <div id="media-container">
-                <img id="bjornImage" src="bjorn.jpg" alt="Bjorn" class="bottom-image">
-            </div>
-        </div>
-
-        <!-- Right Side (Buttons and Inputs) -->
-        <div class="right-section">
-            <h2>Control Panel</h2>
-
-            <!-- Login Button -->
-            <button id="loginButton">Login with Internet Identity</button>
-            <p id="principal"></p>
-
-            <!-- Hidden Text Fields and Buttons (shown after login) -->
-            <div id="authFields" class="hidden">
-                <input type="text" id="inputField1" placeholder="Enter da name">
-                <button id="actionButton1">Submit</button>  
-                <input type="text" id="userIdField" readonly>
-                <input type="text" id="userNameField" readonly>
-            </div>
-        </div>
+  <img src="banner.png" alt="Banner" class="banner" />
+  <div class="container">
+    <div class="left-section" id="left-section">
+      <h1>Welcome to MineBTC</h1>
+      <div class="button-container">
+        <button id="fetchDataBtn">Fetch Data</button>
+        <button id="loadVideoBtn">Load Space Enemy</button>
+      </div>
+      <p id="result">Click a button to perform an action.</p>
+      <div id="media-container">
+        <img id="bjornImage" src="bjorn.jpg" alt="Bjorn" class="bottom-image" />
+      </div>
     </div>
-
-    <script src="script.js"></script> <!-- Regular script -->
-    <script type="module" src="login.js"></script> <!-- Module script -->
-
+    <div class="left-section hidden" id="wallet-dashboard">
+      <h2>Wallet Dashboard</h2>
+      <div class="wallet-item" id="wallet-icp">
+        <div class="wallet-header">
+          <img src="icplogo.webp" alt="ICP Logo" class="wallet-logo" />
+          <h3>ICP</h3>
+        </div>
+        <div class="wallet-body">
+          <div class="wallet-address">
+            <span id="icp-address">lnlob-dywt6-ksajs-…</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <p class="wallet-balance">Balance: <span id="icp-balance">1000</span></p>
+          <div class="wallet-actions">
+            <button class="receive-btn">Receive</button>
+            <button class="send-btn" data-currency="ICP">Send</button>
+            <button class="qr-btn">Show QR</button>
+          </div>
+          <div id="qr-icp" class="qr-container"></div>
+        </div>
+      </div>
+      <div class="wallet-item" id="wallet-ibtc">
+        <div class="wallet-header">
+          <img src="ibtclogo.jpg" alt="iBTC Logo" class="wallet-logo" />
+          <h3>iBTC</h3>
+        </div>
+        <div class="wallet-body">
+          <div class="wallet-address">
+            <span id="ibtc-address">lnlob-dywt6-ksajs-…</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <p class="wallet-balance">Balance: <span id="ibtc-balance">0.55</span></p>
+          <div class="wallet-actions">
+            <button class="receive-btn">Receive</button>
+            <button class="send-btn" data-currency="iBTC">Send</button>
+            <button class="qr-btn">Show QR</button>
+          </div>
+          <div id="qr-ibtc" class="qr-container"></div>
+        </div>
+      </div>
+      <div class="wallet-item" id="wallet-btc">
+        <div class="wallet-header">
+          <img src="bitcoin.webp" alt="BTC Logo" class="wallet-logo" />
+          <h3>BTC</h3>
+        </div>
+        <div class="wallet-body">
+          <div class="wallet-address">
+            <span id="btc-address">lnlob-dywt6-ksajs-…</span>
+            <button class="copy-btn">Copy</button>
+          </div>
+          <p class="wallet-balance">Balance: <span id="btc-balance">2.33</span></p>
+          <div class="wallet-actions">
+            <button class="receive-btn">Receive</button>
+            <button class="send-btn" data-currency="BTC">Send</button>
+            <button class="qr-btn">Show QR</button>
+          </div>
+          <div id="qr-btc" class="qr-container"></div>
+        </div>
+      </div>
+    </div>
+    <div class="right-section">
+      <h2>Control Panel</h2>
+      <button id="loginButton">Login with Internet Identity</button>
+      <p id="principal"></p>
+      <div id="authFields" class="hidden">
+        <input type="text" id="inputField1" placeholder="Enter da name" />
+        <button id="actionButton1">Submit</button>
+        <input type="text" id="userIdField" readonly />
+        <input type="text" id="userNameField" readonly />
+      </div>
+    </div>
+  </div>
+  <div id="sendModal" class="modal hidden" style="display: none;">
+    <div class="modal-content">
+      <div id="sendForm">
+        <h2>Send <span id="sendCurrency"></span></h2>
+        <p>Balance: <span id="sendBalance"></span> <img id="sendLogo" src="" alt="logo" width="20"></p>
+        <label for="destination">Destination:</label>
+        <input type="text" id="destination" placeholder="Enter destination">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" step="0.00001" placeholder="Enter amount">
+        <button id="maxButton">MAX</button>
+        <p id="warning" class="hidden"></p>
+        <p>Transfer fee: <span id="transferFee"></span></p>
+        <div class="modal-actions">
+          <button id="backButton">Back</button>
+          <button id="continueButton">Continue</button>
+        </div>
+      </div>
+      <div id="sendResult" class="hidden">
+        <p id="resultMessage"></p>
+        <button id="closeButton">X</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="script.js"></script>
+  <script type="module" src="login.js"></script>
+  <script type="module" src="wallet.js"></script>
 </body>
 </html>

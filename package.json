@@ -1,0 +1,11 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@dfinity/agent": "^0.18.1"
+  },
+  "scripts": {
+    "build": "echo 'Build step not required' && exit 0"
+  }
+}

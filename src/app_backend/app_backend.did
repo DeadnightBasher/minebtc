@@ -1,5 +1,14 @@
+type Wallet = record {
+  icp_address: text;
+  ibtc_address: text;
+  ckbtc_address: text;
+};
+
 service : {
   "register_user": () -> (nat64, opt text);
   "set_user_name": (text) -> (variant { Ok; Err: text });
   "get_user_profile": () -> (opt record { nat64; text }) query;
+  "get_user_profile_with_wallet": () -> (opt record { nat64; text; opt Wallet }) query;
+  "create_wallet_for_user": () -> (variant { Ok: Wallet; Err: text });
+  "get_wallet": () -> (opt Wallet) query;
 }

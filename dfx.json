@@ -6,12 +6,8 @@
       "type": "rust"
     },
     "app_frontend": {
-      "dependencies": [
-        "app_backend"
-      ],
-      "source": [
-        "src/app_frontend/assets"
-      ],
+      "dependencies": ["app_backend"],
+      "source": ["src/app_frontend/assets"],
       "type": "assets"
     },
     "internet_identity": {
