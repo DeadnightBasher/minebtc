@@ -17,6 +17,7 @@ ic-stable-structures = "0.6"
 sha2 = "0.10"        # For Account ID computation
 crc32fast = "1.3"    # For Account ID computation
 hex = "0.4"          # Added for hex encoding
+ic-ledger-types = "0.10.0"  # Added for ledger types
 
 [patch.crates-io]
 candid = { version = "0.10.13" }

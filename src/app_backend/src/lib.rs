@@ -1,4 +1,4 @@
-use candid::{CandidType, Deserialize};
+use candid::{CandidType, Deserialize, Principal};
 use ic_cdk::{query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryManager, VirtualMemory, MemoryId},
@@ -9,16 +9,19 @@ use ic_stable_structures::{
 use serde::Serialize;
 use std::borrow::Cow;
 use std::cell::RefCell;
+use ic_cdk::api::call::CallResult;
+use ic_cdk::api::management_canister::http_request::{
+    http_request, CanisterHttpRequestArgument, HttpResponse, TransformArgs, TransformContext, HttpMethod,
+};
 
-mod wallet; // Import wallet.rs
-
-use wallet::{get_wallet, get_or_create_wallet, Wallet}; // Import necessary functions
-
-const MAX_KEY_SIZE: u32 = 29;
-const MAX_VALUE_SIZE: u32 = 1024;
+mod wallet;
+use wallet::{get_or_create_wallet, Wallet};
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
 
+const HYBRID_WALLET_ACCOUNT_ID: &str = "ac56a701340ea9dbcea23664c516557d04c0630556e2c9192c8df03e820293fc";
+
+// UserProfile struct (already defined)
 #[derive(CandidType, Deserialize, Serialize, Clone)]
 pub struct UserProfile {
     user_id: u64,
@@ -29,12 +32,18 @@ impl Storable for UserProfile {
     fn to_bytes(&self) -> Cow<[u8]> {
         Cow::Owned(serde_cbor::to_vec(self).unwrap())
     }
-
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
         serde_cbor::from_slice(bytes.as_ref()).unwrap()
     }
-
     const BOUND: Bound = Bound::Unbounded;
+}
+
+// Struct for get_user_profile_with_wallet
+#[derive(CandidType, Deserialize, Serialize)]
+struct UserProfileWithWallet {
+    user_id: u64,
+    name: String,
+    wallet: Option<Wallet>,
 }
 
 thread_local! {
@@ -75,9 +84,7 @@ fn register_user() -> (u64, Option<String>) {
                 name: String::new(),
             });
 
-            // Automatically create a wallet for the user
-            let _ = get_or_create_wallet(); // This ensures wallet creation on first login
-
+            get_or_create_wallet().expect("Failed to create wallet on registration");
             (user_id, None)
         }
     })
@@ -101,32 +108,84 @@ fn set_user_name(name: String) -> Result<(), String> {
 }
 
 #[query]
-fn get_user_profile() -> Option<(u64, String)> {
+fn get_user_profile() -> Option<UserProfile> {
     let caller = ic_cdk::caller();
     let caller_bytes = caller.as_slice().to_vec();
 
     USERS.with(|users| {
-        users.borrow().get(&caller_bytes)
-             .map(|profile| (profile.user_id, profile.name.clone()))
+        users.borrow().get(&caller_bytes).map(|profile| UserProfile {
+            user_id: profile.user_id,
+            name: profile.name.clone(),
+        })
     })
 }
 
 #[query]
-fn get_user_profile_with_wallet() -> Option<(u64, String, Option<Wallet>)> {
+fn get_user_profile_with_wallet() -> Option<UserProfileWithWallet> {
     let caller = ic_cdk::caller();
     let caller_bytes = caller.as_slice().to_vec();
 
     USERS.with(|users| {
         users.borrow().get(&caller_bytes).map(|profile| {
-            let wallet = get_wallet(); // Retrieve the user's wallet
-            (profile.user_id, profile.name.clone(), wallet)
+            let wallet = wallet::get_wallet();
+            UserProfileWithWallet {
+                user_id: profile.user_id,
+                name: profile.name.clone(),
+                wallet,
+            }
         })
     })
 }
 
 #[update]
 fn create_wallet_for_user() -> Result<Wallet, String> {
-    get_or_create_wallet() // Calls wallet.rs function to create/get wallet
+    get_or_create_wallet()
+}
+
+#[query]
+fn fetch_wallet() -> Option<Wallet> {
+    wallet::get_wallet()
+}
+
+#[update]
+async fn icp_to_usd_rate() -> Result<f64, String> {
+    let request = CanisterHttpRequestArgument {
+        method: HttpMethod::GET,
+        url: "https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd".to_string(),
+        max_response_bytes: Some(2000),
+        headers: vec![],
+        body: Some(vec![]),
+        transform: Some(TransformContext::from_name("transform".to_string(), vec![])),
+    };
+
+    let response: CallResult<(HttpResponse,)> = http_request(request, 500_000_000).await;
+    match response {
+        Ok((http_response,)) => {
+            let body_str = String::from_utf8(http_response.body).map_err(|e| format!("UTF-8 error: {}", e))?;
+            let rate = body_str
+                .split("\"usd\":")
+                .nth(1)
+                .and_then(|s| s.split("}").next())
+                .and_then(|s| s.parse::<f64>().ok())
+                .ok_or("Failed to parse USD rate")?;
+            Ok(rate)
+        }
+        Err(e) => Err(format!("HTTP request failed: {:?}", e)),
+    }
+}
+
+#[update]
+async fn record_deposit(amount_e8s: u64, block_index: u64) -> Result<f64, String> {
+    let usd_rate = icp_to_usd_rate().await?;
+    let amount_usd = (amount_e8s as f64 / 1e8) * usd_rate;
+    Ok(amount_usd)
+}
+
+#[query]
+fn transform(raw: TransformArgs) -> HttpResponse {
+    let mut response = raw.response;
+    response.headers = vec![];
+    response
 }
 
 ic_cdk::export_candid!();

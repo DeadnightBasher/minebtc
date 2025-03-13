@@ -22,62 +22,88 @@
       </div>
     </div>
     <div class="left-section hidden" id="wallet-dashboard">
-      <h2>Wallet Dashboard</h2>
-      <div class="wallet-item" id="wallet-icp">
-        <div class="wallet-header">
-          <img src="icplogo.webp" alt="ICP Logo" class="wallet-logo" />
-          <h3>ICP</h3>
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button id="walletDashboardBtn">Wallet Dashboard</button>
+        <button id="mineBitcoinBtn">Mine Bitcoin</button>
+      </div>
+      <!-- Wallet Dashboard View -->
+      <div id="walletDashboardContent">
+        <h2>Wallet Dashboard</h2>
+        <div class="wallet-item" id="wallet-icp">
+          <div class="wallet-header">
+            <img src="icplogo.webp" alt="ICP Logo" class="wallet-logo" />
+            <h3>ICP</h3>
+          </div>
+          <div class="wallet-body">
+            <div class="wallet-address">
+              <span id="icp-address"></span>
+            </div>
+            <p class="wallet-balance">Balance: <span id="icp-balance">Loading...</span></p>
+            <div class="wallet-actions">
+              <button class="receive-btn">Receive</button>
+              <button class="send-btn" data-currency="ICP">Send</button>
+            </div>
+          </div>
         </div>
-        <div class="wallet-body">
-          <div class="wallet-address">
-            <span id="icp-address">lnlob-dywt6-ksajs-…</span>
-            <button class="copy-btn">Copy</button>
+        <div class="wallet-item" id="wallet-ibtc">
+          <div class="wallet-header">
+            <img src="ibtclogo.jpg" alt="iBTC Logo" class="wallet-logo" />
+            <h3>iBTC</h3>
           </div>
-          <p class="wallet-balance">Balance: <span id="icp-balance">1000</span></p>
-          <div class="wallet-actions">
-            <button class="receive-btn">Receive</button>
-            <button class="send-btn" data-currency="ICP">Send</button>
-            <button class="qr-btn">Show QR</button>
+          <div class="wallet-body">
+            <div class="wallet-address">
+              <span id="ibtc-address"></span>
+            </div>
+            <p class="wallet-balance">Balance: <span id="ibtc-balance">Loading...</span></p>
+            <div class="wallet-actions">
+              <button class="receive-btn">Receive</button>
+              <button class="send-btn" data-currency="iBTC">Send</button>
+            </div>
           </div>
-          <div id="qr-icp" class="qr-container"></div>
+        </div>
+        <div class="wallet-item" id="wallet-btc">
+          <div class="wallet-header">
+            <img src="bitcoin.webp" alt="BTC Logo" class="wallet-logo" />
+            <h3>BTC</h3>
+          </div>
+          <div class="wallet-body">
+            <div class="wallet-address">
+              <span id="btc-address"></span>
+            </div>
+            <p class="wallet-balance">Balance: <span id="btc-balance">Loading...</span></p>
+            <div class="wallet-actions">
+              <button class="receive-btn">Receive</button>
+              <button class="send-btn" data-currency="BTC">Send</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="wallet-item" id="wallet-ibtc">
-        <div class="wallet-header">
-          <img src="ibtclogo.jpg" alt="iBTC Logo" class="wallet-logo" />
-          <h3>iBTC</h3>
-        </div>
-        <div class="wallet-body">
-          <div class="wallet-address">
-            <span id="ibtc-address">lnlob-dywt6-ksajs-…</span>
-            <button class="copy-btn">Copy</button>
+      <!-- Mine Bitcoin Dashboard -->
+      <div id="mineBitcoinContent" class="hidden">
+        <h2>Mine Bitcoin Dashboard</h2>
+        <div class="dashboard-container">
+          <!-- Start Mining Section -->
+          <div class="dashboard-card">
+            <h3>Start Mining</h3>
+            <div class="input-group">
+              <input type="number" id="depositAmount" step="0.00001" placeholder="Enter ICP amount" />
+              <button id="maxDepositBtn">MAX</button>
+            </div>
+            <button id="startMiningBtn" class="action-btn primary-btn">Start Mining</button>
           </div>
-          <p class="wallet-balance">Balance: <span id="ibtc-balance">0.55</span></p>
-          <div class="wallet-actions">
-            <button class="receive-btn">Receive</button>
-            <button class="send-btn" data-currency="iBTC">Send</button>
-            <button class="qr-btn">Show QR</button>
+          <!-- Claim Bitcoin Section -->
+          <div class="dashboard-card">
+            <h3>Claim Bitcoin</h3>
+            <p>Your Mined Satoshi: <span id="minedSatoshi">0</span></p>
+            <button id="claimSatoshiBtn" class="action-btn orange-btn">Claim Satoshi</button>
           </div>
-          <div id="qr-ibtc" class="qr-container"></div>
-        </div>
-      </div>
-      <div class="wallet-item" id="wallet-btc">
-        <div class="wallet-header">
-          <img src="bitcoin.webp" alt="BTC Logo" class="wallet-logo" />
-          <h3>BTC</h3>
-        </div>
-        <div class="wallet-body">
-          <div class="wallet-address">
-            <span id="btc-address">lnlob-dywt6-ksajs-…</span>
-            <button class="copy-btn">Copy</button>
+          <!-- Claim iBTC Section -->
+          <div class="dashboard-card">
+            <h3>Claim iBTC</h3>
+            <p>Your iBTC Holding: <span id="ibtcHolding">0</span></p>
+            <button id="claimIbtcBtn" class="action-btn golden-btn">Claim iBTC</button>
           </div>
-          <p class="wallet-balance">Balance: <span id="btc-balance">2.33</span></p>
-          <div class="wallet-actions">
-            <button class="receive-btn">Receive</button>
-            <button class="send-btn" data-currency="BTC">Send</button>
-            <button class="qr-btn">Show QR</button>
-          </div>
-          <div id="qr-btc" class="qr-container"></div>
         </div>
       </div>
     </div>
@@ -93,6 +119,7 @@
       </div>
     </div>
   </div>
+  <!-- Send Modal -->
   <div id="sendModal" class="modal hidden" style="display: none;">
     <div class="modal-content">
       <div id="sendForm">
@@ -113,6 +140,23 @@
       <div id="sendResult" class="hidden">
         <p id="resultMessage"></p>
         <button id="closeButton">X</button>
+      </div>
+    </div>
+  </div>
+  <!-- Receive Modal -->
+  <div id="receiveModal" class="modal hidden" style="display: none;">
+    <div class="modal-content">
+      <div class="receive-header">
+        <h2>Receive <span id="receiveCurrency"></span></h2>
+        <img id="receiveLogo" src="" alt="Currency Logo" width="40">
+      </div>
+      <div id="receiveQR" class="receive-qr"></div>
+      <div class="receive-address">
+        <span id="receiveAddress"></span>
+        <button id="receiveCopyButton" class="copy-btn">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button id="receiveFinishButton">Finish</button>
       </div>
     </div>
   </div>

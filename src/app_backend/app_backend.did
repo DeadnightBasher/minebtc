@@ -11,4 +11,8 @@ service : {
   "get_user_profile_with_wallet": () -> (opt record { nat64; text; opt Wallet }) query;
   "create_wallet_for_user": () -> (variant { Ok: Wallet; Err: text });
   "get_wallet": () -> (opt Wallet) query;
+  "fetch_wallet": () -> (opt Wallet) query;
+  "record_deposit": (nat64, nat64) -> (variant { Ok: float64; Err: text });
+  "icp_to_usd_rate": () -> (variant { Ok: float64; Err: text });
+  "transform": (record { response: record { status: nat16; headers: vec record { text; text }; body: vec nat8 }; context: vec nat8 }) -> (record { status: nat16; headers: vec record { text; text }; body: vec nat8 }) query;
 }
