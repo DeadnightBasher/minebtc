@@ -1,14 +1,48 @@
 {
   "canisters": {
     "app_backend": {
-      "candid": "src/app_backend/app_backend.did",
+      "candid": "src/declarations/app_backend/app_backend.did",
       "package": "app_backend",
-      "type": "rust"
+      "type": "rust",
+      "post_install": [
+        "./generate_did.sh"
+      ],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
     },
     "app_frontend": {
       "dependencies": ["app_backend"],
       "source": ["src/app_frontend/assets"],
       "type": "assets"
+    },
+    "financial_engine": {
+      "candid": "src/declarations/financial_engine/financial_engine.did",
+      "package": "financial_engine",
+      "type": "rust",
+      "post_install": [
+        "./generate_did.sh"
+      ],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
+    "ibtc": {
+      "candid": "src/declarations/ibtc/ibtc.did",
+      "package": "ibtc",
+      "type": "rust",
+      "post_install": [
+        "./generate_did.sh"
+      ],
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
     },
     "internet_identity": {
       "type": "custom",

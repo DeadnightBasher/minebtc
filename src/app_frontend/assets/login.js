@@ -7,6 +7,7 @@ import { fetchWalletBalances, setupWalletButtonListeners } from "./wallet.js";
 
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const backendCanisterId = isLocal ? "bd3sg-teaaa-aaaaa-qaaba-cai" : "umafp-4yaaa-aaaag-at42q-cai";
+const financialEngineCanisterId = "mqmbp-oqaaa-aaaag-at6da-cai";
 
 async function updateUserProfile(principal) {
   console.log("updateUserProfile: Starting with principal:", principal.toText());
@@ -61,6 +62,15 @@ async function login() {
       window.agent = agent;
       window.backendActor = Actor.createActor(idlFactory, { agent, canisterId: backendCanisterId });
       console.log("login: Backend actor created, available methods:", Object.keys(window.backendActor));
+
+      // Create financial_engine actor
+      window.financialEngineActor = Actor.createActor(({ IDL }) => {
+        return IDL.Service({
+          get_deposit_address: IDL.Func([], [IDL.Text], ['query']),
+          claim_deposit: IDL.Func([], [IDL.Variant({ Ok: IDL.Nat64, Err: IDL.Text })], []),
+          commit_for_mining: IDL.Func([IDL.Nat64], [IDL.Variant({ Ok: IDL.Float64, Err: IDL.Text })], []),
+        });
+      }, { agent, canisterId: financialEngineCanisterId });
 
       document.getElementById("principal").innerText = "Logged in as: " + principal.toText();
       document.getElementById("authFields").classList.remove("hidden");

@@ -1,6 +1,36 @@
+import { Actor } from "https://cdn.jsdelivr.net/npm/@dfinity/agent@0.18.1/+esm";
+import { AccountIdentifier } from "https://cdn.jsdelivr.net/npm/@dfinity/ledger-icp@2.2.1/+esm";
 import { fetchWalletBalances } from "./wallet.js";
 
-// Function to fetch backend data (unchanged)
+// Function to transfer ICP
+async function transferICP(toAccountId, amountE8s) {
+    const icpLedgerActor = Actor.createActor(({ IDL }) => {
+        return IDL.Service({
+            transfer: IDL.Func(
+                [IDL.Record({
+                    to: IDL.Vec(IDL.Nat8),
+                    amount: IDL.Record({ e8s: IDL.Nat64 }),
+                    fee: IDL.Record({ e8s: IDL.Nat64 }),
+                    memo: IDL.Nat64,
+                    created_at_time: IDL.Opt(IDL.Nat64),
+                })],
+                [IDL.Variant({ Ok: IDL.Nat64, Err: IDL.Text })],
+                []
+            ),
+        });
+    }, { agent: window.agent, canisterId: "ryjl3-tyaaa-aaaaa-aaaba-cai" });
+    const destAccount = AccountIdentifier.fromHex(toAccountId);
+    const result = await icpLedgerActor.transfer({
+        to: destAccount.toNumbers(),
+        amount: { e8s: amountE8s },
+        fee: { e8s: 10000n }, // 0.0001 ICP
+        memo: 0n,
+        created_at_time: [],
+    });
+    return result;
+}
+
+// Function to fetch backend data
 export async function fetchBackendData() {
     try {
         const instructions = `Instructions:\n1: Connect your Internet Identity\n2: Deposit ICP\n3: The app will farm ckBTC daily for the rest of your life\n4: You can withdraw ckBTC whenever you want`;
@@ -15,7 +45,7 @@ export async function fetchBackendData() {
     }
 }
 
-// Function to load a video (unchanged)
+// Function to load a video
 export function loadCatVideo() {
     const mediaContainer = document.getElementById("media-container");
     const existingImage = document.getElementById("bjornImage");
@@ -49,7 +79,7 @@ document.getElementById('mineBitcoinBtn').addEventListener('click', showMineBitc
 // Initially show Wallet Dashboard
 showWalletDashboard();
 
-// Record Deposit functionality (replacing startMining)
+// Record Deposit functionality
 async function recordDeposit() {
     const amountInput = document.getElementById('depositAmount').value;
     if (!amountInput || isNaN(amountInput) || parseFloat(amountInput) <= 0) {
@@ -58,22 +88,39 @@ async function recordDeposit() {
     }
 
     const amountE8s = BigInt(Math.round(parseFloat(amountInput) * 1e8));
-    const blockIndex = 0n; // Placeholder: In a real app, this should come from an actual ICP transfer confirmation
 
     try {
-        const result = await window.backendActor.record_deposit(amountE8s, blockIndex);
-        if ('Ok' in result) {
-            const usdValue = result.Ok;
-            alert(`Deposit recorded successfully!\nDeposited ${amountInput} ICP ($${usdValue.toFixed(2)} USD)`);
-            await fetchWalletBalances(window.principal); // Refresh balances
-            // Optionally update mined Satoshi or iBTC display here if backend tracks it
-            document.getElementById('minedSatoshi').textContent = "Pending backend update";
-            document.getElementById('ibtcHolding').textContent = "Pending backend update";
-        } else {
-            alert(`Failed to record deposit: ${result.Err}`);
+        // Get deposit address from financial_engine
+        const depositAddress = await window.financialEngineActor.get_deposit_address();
+        console.log("Deposit address:", depositAddress);
+
+        // Transfer ICP to financial_engine
+        const transferResult = await transferICP(depositAddress, amountE8s);
+        if ('Err' in transferResult) {
+            throw new Error(transferResult.Err);
         }
+        console.log("Transfer successful, block index:", transferResult.Ok);
+
+        // Claim deposit in financial_engine
+        const claimResult = await window.financialEngineActor.claim_deposit();
+        if ('Err' in claimResult) {
+            throw new Error(claimResult.Err);
+        }
+        console.log("Claim deposit successful, delta:", claimResult.Ok);
+
+        // Commit for mining and get USD value
+        const commitResult = await window.financialEngineActor.commit_for_mining(amountE8s);
+        if ('Err' in commitResult) {
+            throw new Error(commitResult.Err);
+        }
+        const usdValue = commitResult.Ok;
+
+        alert(`Mining started successfully!\nCommitted ${amountInput} ICP ($${usdValue.toFixed(2)} USD)`);
+        await fetchWalletBalances(window.principal); // Refresh balances
+        document.getElementById('minedSatoshi').textContent = "Pending backend update";
+        document.getElementById('ibtcHolding').textContent = "Pending backend update";
     } catch (error) {
-        console.error('Error recording deposit:', error);
+        console.error('Error starting mining:', error);
         alert(`Error: ${error.message}`);
     }
 }

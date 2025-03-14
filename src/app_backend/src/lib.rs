@@ -9,10 +9,6 @@ use ic_stable_structures::{
 use serde::Serialize;
 use std::borrow::Cow;
 use std::cell::RefCell;
-use ic_cdk::api::call::CallResult;
-use ic_cdk::api::management_canister::http_request::{
-    http_request, CanisterHttpRequestArgument, HttpResponse, TransformArgs, TransformContext, HttpMethod,
-};
 
 mod wallet;
 use wallet::{get_or_create_wallet, Wallet};
@@ -21,7 +17,7 @@ type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 const HYBRID_WALLET_ACCOUNT_ID: &str = "ac56a701340ea9dbcea23664c516557d04c0630556e2c9192c8df03e820293fc";
 
-// UserProfile struct (already defined)
+// UserProfile struct
 #[derive(CandidType, Deserialize, Serialize, Clone)]
 pub struct UserProfile {
     user_id: u64,
@@ -145,47 +141,6 @@ fn create_wallet_for_user() -> Result<Wallet, String> {
 #[query]
 fn fetch_wallet() -> Option<Wallet> {
     wallet::get_wallet()
-}
-
-#[update]
-async fn icp_to_usd_rate() -> Result<f64, String> {
-    let request = CanisterHttpRequestArgument {
-        method: HttpMethod::GET,
-        url: "https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd".to_string(),
-        max_response_bytes: Some(2000),
-        headers: vec![],
-        body: Some(vec![]),
-        transform: Some(TransformContext::from_name("transform".to_string(), vec![])),
-    };
-
-    let response: CallResult<(HttpResponse,)> = http_request(request, 500_000_000).await;
-    match response {
-        Ok((http_response,)) => {
-            let body_str = String::from_utf8(http_response.body).map_err(|e| format!("UTF-8 error: {}", e))?;
-            let rate = body_str
-                .split("\"usd\":")
-                .nth(1)
-                .and_then(|s| s.split("}").next())
-                .and_then(|s| s.parse::<f64>().ok())
-                .ok_or("Failed to parse USD rate")?;
-            Ok(rate)
-        }
-        Err(e) => Err(format!("HTTP request failed: {:?}", e)),
-    }
-}
-
-#[update]
-async fn record_deposit(amount_e8s: u64, block_index: u64) -> Result<f64, String> {
-    let usd_rate = icp_to_usd_rate().await?;
-    let amount_usd = (amount_e8s as f64 / 1e8) * usd_rate;
-    Ok(amount_usd)
-}
-
-#[query]
-fn transform(raw: TransformArgs) -> HttpResponse {
-    let mut response = raw.response;
-    response.headers = vec![];
-    response
 }
 
 ic_cdk::export_candid!();

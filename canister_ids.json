@@ -4,5 +4,11 @@
   },
   "app_frontend": {
     "ic": "ufdot-kqaaa-aaaag-at43a-cai"
+  },
+  "financial_engine": {
+    "ic": "mqmbp-oqaaa-aaaag-at6da-cai"
+  },
+  "ibtc": {
+    "ic": "mxnh3-diaaa-aaaag-at6dq-cai"
   }
 }

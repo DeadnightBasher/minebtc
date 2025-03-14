@@ -1,5 +1,7 @@
 [workspace]
 members = [
-    "src/app_backend"
+    "src/app_backend",
+    "src/financial_engine",
+    "src/ibtc"
 ]
 resolver = "2"
